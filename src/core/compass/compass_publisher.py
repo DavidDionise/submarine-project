@@ -9,14 +9,13 @@ import logging
 class CompassPublisher(Publisher):
 
     def __init__(self, i2c_bus=1, i2c_address=0x70, rate=0.2):
-        """
-        Initializes the CompassController with i2c bus properties
+        """Initializes the CompassController with i2c bus properties
         and fetch rate of the compass
-        :param bus: The bus number of the i2c device (default 1)
-        :type bus: int
-        :param i2c_address: Address of the compass (defaults to 0x70 for use with G7 26 compass)
-        :type i2c_address: 
-        :param rate: Rate in seconds of new compass readings (default 0.2)
+
+        Args:
+            i2c_bus (int, optional):  Defaults to 1.
+            i2c_address (hexadecimal, optional):  Defaults to 0x70.
+            rate (float, optional): Duration in seconds between direction publishes Defaults to 0.2.
         """
 
         super().__init__()
