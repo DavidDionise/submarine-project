@@ -1,6 +1,7 @@
 from unittest import TestCase
+from decimal import Decimal
 
-from core.steering.steering_controller import _calculate_angle_of_deviation
+from core.steering.steering_controller import _calculate_angle_of_deviation, _angle_to_servo_duration
 
 
 class Test(TestCase):
@@ -41,3 +42,10 @@ class Test(TestCase):
         actual_value = _calculate_angle_of_deviation(current_read, set_head)
 
         self.assertEqual(expected_value, actual_value)
+
+    def test__angle_to_servo_duration(self):
+        self.assertEquals(1.0, _angle_to_servo_duration(0))
+        self.assertEquals(1.25, _angle_to_servo_duration(45))
+        self.assertEquals(1.5, _angle_to_servo_duration(90))
+        self.assertEquals(1.75, _angle_to_servo_duration(135))
+        self.assertEquals(2.0, _angle_to_servo_duration(180))

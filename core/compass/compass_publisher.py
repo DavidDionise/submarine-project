@@ -36,11 +36,11 @@ class CompassPublisher(Publisher):
             high_bits, low_bits = read.buf[1:3]
             degress = _bytes_to_degrees(high_bits, low_bits)
 
-            logging.debug("Compass Degrees: ", degress)
+            logging.debug(f"Compass Degrees: {degress}")
             self.publish(degress)
 
-            time.Sleep(self._rate)
+            time.sleep(self._rate)
 
 
 def _bytes_to_degrees(b1, b2):
-    return ((b1 << 8) + b2) / 10
+    return int(((b1 << 8) + b2) / 10)
