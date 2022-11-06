@@ -6,11 +6,17 @@ import logging
 from core.compass.compass_publisher import CompassPublisher
 from core.steering.steering_controller import SteeringController
 from core.hardware_coordinator.hardware_coordinator import HardwareController
+import json
+import threading
 
 
 class WebSocketController:
 
     def __init__(self):
+        self._lock = threading.Lock()
+        self._compass_publisher = CompassPublisher(lock=self._lock)
+        self._hardware_controller = None
+
         websocket.enableTrace(True)
         ws = websocket.WebSocketApp(config["local"]["server_host"],
                                     on_open=self.on_open,
@@ -23,14 +29,17 @@ class WebSocketController:
         rel.signal(2, rel.abort)  # Keyboard Interrupt
         rel.dispatch()
 
-        self._compass_publisher = CompassPublisher()
+    def on_message(self, ws, message_json):
+        message = json.loads(message_json)
 
-    def on_message(self, ws, message):
-        if message["status"] == "STOP" and self._hardware_controller != None:
-            self._hardware_controller.stop_hardware()
+        if message["status"] == "STOP":
+            if self._hardware_controller != None:
+                logging.info("Received STOP status")
+                self._hardware_controller.stop_hardware()
 
         else:
             set_head = int(message["data"]["setHead"])
+            logging.info(f"Received ACTIVE status with setHead: {set_head}")
             steering_controller = SteeringController(
                 compass_publisher=self._compass_publisher,
                 set_head=set_head,
@@ -43,7 +52,8 @@ class WebSocketController:
                 steering_controller=steering_controller
             )
 
-            self._hardware_controller.start_hardware()
+            threading.Thread(
+                target=self._hardware_controller.start_hardware).start()
 
     def on_error(self, ws, error):
         logging.error(f"Error: {error}")

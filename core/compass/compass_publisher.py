@@ -8,7 +8,7 @@ import logging
 
 class CompassPublisher(Publisher):
 
-    def __init__(self, i2c_bus=1, i2c_address=0x70, rate=0.2):
+    def __init__(self, i2c_bus=1, i2c_address=0x70, rate=0.2, lock=None):
         """Initializes the CompassController with i2c bus properties
         and fetch rate of the compass
 
@@ -24,15 +24,21 @@ class CompassPublisher(Publisher):
         self._i2c_address = i2c_address
         self._rate = rate
         self._status = 'STOPPED'
+        self._lock = lock
 
         self._smbus = smbus.SMBus(i2c_bus)
 
     def run(self):
-        while True:
-            self._status = 'ACTIVE'
+        self.acquire_lock()
+        self._status = 'ACTIVE'
+        self.release_lock()
 
+        while True:
+            self.acquire_lock()
             if self._status == 'STOPPED':
+                self.release_lock()
                 break
+            self.release_lock()
 
             write = smbus.i2c_msg.write(self._i2c_address, [0x00, 0x31])
             read = smbus.i2c_msg.read(self._i2c_address, 8)
@@ -48,7 +54,18 @@ class CompassPublisher(Publisher):
             time.sleep(self._rate)
 
     def stop(self):
+        logging.info("Stopping compass")
+        self.acquire_lock()
         self._status = 'STOPPED'
+        self.release_lock()
+
+    def acquire_lock(self):
+        if self._lock != None:
+            self._lock.acquire()
+
+    def release_lock(self):
+        if self._lock != None:
+            self._lock.release()
 
 
 def _bytes_to_degrees(b1, b2):

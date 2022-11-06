@@ -1,3 +1,5 @@
+import logging
+
 
 class HardwareController:
 
@@ -9,4 +11,5 @@ class HardwareController:
         self._compass_publisher.run()
 
     def stop_hardware(self):
+        logging.info("Stopping hardware")
         self._compass_publisher.stop()

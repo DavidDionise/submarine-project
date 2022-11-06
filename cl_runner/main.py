@@ -3,7 +3,7 @@ from core.steering.steering_controller import SteeringController
 from core.compass.compass_publisher import CompassPublisher
 import logging
 
-logging.getLogger().setLevel(logging.DEBUG)
+# logging.getLogger().setLevel(logging.DEBUG)
 
 compass_publisher = CompassPublisher(rate=0.1)
 steering_controller = SteeringController(
