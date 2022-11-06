@@ -23,11 +23,17 @@ class CompassPublisher(Publisher):
         self._i2c_bus = i2c_bus
         self._i2c_address = i2c_address
         self._rate = rate
+        self._status = 'STOPPED'
 
         self._smbus = smbus.SMBus(i2c_bus)
 
     def run(self):
         while True:
+            self._status = 'ACTIVE'
+
+            if self._status == 'STOPPED':
+                break
+
             write = smbus.i2c_msg.write(self._i2c_address, [0x00, 0x31])
             read = smbus.i2c_msg.read(self._i2c_address, 8)
 
@@ -40,6 +46,9 @@ class CompassPublisher(Publisher):
             self.publish(degress)
 
             time.sleep(self._rate)
+
+    def stop(self):
+        self._status = 'STOPPED'
 
 
 def _bytes_to_degrees(b1, b2):
