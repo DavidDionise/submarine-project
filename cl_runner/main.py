@@ -9,8 +9,6 @@ compass_publisher = CompassPublisher(rate=0.1)
 steering_controller = SteeringController(
     compass_publisher=compass_publisher,
     set_head=0,
-    servo_min_angle=113,
-    servo_max_angle=211,
     gpio_pin=18
 )
 

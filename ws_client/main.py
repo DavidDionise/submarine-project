@@ -8,17 +8,21 @@ from core.steering.steering_controller import SteeringController
 from core.hardware_coordinator.hardware_coordinator import HardwareController
 import json
 import threading
+import os
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class WebSocketController:
 
     def __init__(self):
+        env = os.environ["ENV"]
         self._lock = threading.Lock()
         self._compass_publisher = CompassPublisher(lock=self._lock)
         self._hardware_controller = None
 
         websocket.enableTrace(True)
-        ws = websocket.WebSocketApp(config["local"]["server_host"],
+        ws = websocket.WebSocketApp(config[env]["server_host"],
                                     on_open=self.on_open,
                                     on_message=self.on_message,
                                     on_error=self.on_error,
@@ -43,8 +47,6 @@ class WebSocketController:
             steering_controller = SteeringController(
                 compass_publisher=self._compass_publisher,
                 set_head=set_head,
-                servo_min_angle=113,
-                servo_max_angle=211,
                 gpio_pin=18
             )
             self._hardware_controller = HardwareController(

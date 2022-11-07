@@ -1,7 +1,7 @@
 
 
 import time
-from core.publisher import Publisher
+from core.utils.publisher import Publisher
 import smbus2 as smbus
 import logging
 
