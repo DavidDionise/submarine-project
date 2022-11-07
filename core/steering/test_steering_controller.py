@@ -44,8 +44,8 @@ class Test(TestCase):
         self.assertEqual(expected_value, actual_value)
 
     def test__angle_to_servo_duration(self):
-        self.assertEquals(-1, _angle_to_servo_duration(0))
-        self.assertEquals(-0.5, _angle_to_servo_duration(45))
-        self.assertEquals(0, _angle_to_servo_duration(90))
-        self.assertEquals(0.5, _angle_to_servo_duration(135))
-        self.assertEquals(1, _angle_to_servo_duration(180))
+        self.assertEquals(-1, _angle_to_servo_duration(-90))
+        self.assertEquals(-0.5, _angle_to_servo_duration(-45))
+        self.assertEquals(0, _angle_to_servo_duration(0))
+        self.assertEquals(0.5, _angle_to_servo_duration(45))
+        self.assertEquals(1, _angle_to_servo_duration(90))

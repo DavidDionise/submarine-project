@@ -23,16 +23,12 @@ class SteeringController:
         angle_of_deviation = _calculate_angle_of_deviation(
             angle, self._set_head)
 
-        # Center for the servo motor is 90°, with a range of 0° to 180°. Need
-        # to modify the value we get back from the angle of deviation to fit
-        # the servo
-
-        servo_angle_of_deviation = angle_of_deviation + 90
-
-        if servo_angle_of_deviation < 0:
-            servo_angle_of_deviation = 0
-        elif servo_angle_of_deviation > 180:
-            servo_angle_of_deviation = 180
+        if angle_of_deviation < -90:
+            servo_angle_of_deviation = -90
+        elif angle_of_deviation > 90:
+            servo_angle_of_deviation = 90
+        else:
+            servo_angle_of_deviation = angle_of_deviation
 
         servo_value = self._angle_to_servo_duration_map[servo_angle_of_deviation]
 
@@ -62,7 +58,7 @@ def _calculate_angle_of_deviation(current_read, set_head):
         return angle
 
 
-def _generate_angle_to_servo_duration_map(min=0, max=180):
+def _generate_angle_to_servo_duration_map(min=-90, max=90):
     return {k: _angle_to_servo_duration(k) for k in range(min, max + 1)}
 
 
@@ -78,6 +74,6 @@ def _angle_to_servo_duration(angle):
     """
 
     if angle == 0:  # Avoid div by 0 error
-        return -1
+        return 0
     else:
-        return float(f'{-1.0 + 2.0 / (180.0 / angle):.2f}')
+        return float(f'{2.0 / (180.0 / angle):.2f}')
