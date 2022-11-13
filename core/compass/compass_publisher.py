@@ -59,6 +59,9 @@ class CompassPublisher(Publisher):
         self._status = 'STOPPED'
         self.release_lock()
 
+    def set_lock(self, lock):
+        self._lock = lock
+
     def acquire_lock(self):
         if self._lock != None:
             self._lock.acquire()

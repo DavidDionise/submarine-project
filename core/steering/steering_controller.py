@@ -3,7 +3,7 @@ from gpiozero import Servo
 
 
 class SteeringController:
-    def __init__(self, compass_publisher, set_head, gpio_pin):
+    def __init__(self, compass_publisher, gpio_pin):
         """
 
         Args:
@@ -13,13 +13,16 @@ class SteeringController:
         """
         self._servo = Servo(gpio_pin)
         self._compass_publisher = compass_publisher
-        self._set_head = set_head
-        self._gpio_pin = gpio_pin
+        self._set_head = None
         self._angle_to_servo_duration_map = _generate_angle_to_servo_duration_map()
 
         compass_publisher.register_listener(self.angle_change_handler)
 
     def angle_change_handler(self, angle):
+        if self._set_head == None:
+            logging.error("\"set_head\" set to None")
+            return
+
         angle_of_deviation = _calculate_angle_of_deviation(
             angle, self._set_head)
 
@@ -35,6 +38,12 @@ class SteeringController:
         logging.debug(f"Value sent to servo: {servo_value}")
 
         self._servo.value = servo_value
+
+    def update_set_head(self, set_head):
+        self._set_head = set_head
+
+    def stop(self):
+        self._servo.value = 0
 
 
 def _calculate_angle_of_deviation(current_read, set_head):
