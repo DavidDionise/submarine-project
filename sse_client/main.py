@@ -17,7 +17,7 @@ env = os.environ["ENV"]
 
 class SseClient:
     def __init__(self):
-        self._esc_motor_controller = EscMotorController(gpio_pin=16)
+        self._esc_motor_controller = EscMotorController(gpio_pin=12)
         self._compass_publisher = CompassPublisher()
         self._steering_controller = SteeringController(
             compass_publisher=self._compass_publisher,
@@ -31,9 +31,6 @@ class SseClient:
         self._hardware_started = False
 
     def run(self):
-        threading.Thread(target=self.handle_process_loop).start()
-
-    def handle_process_loop(self):
         while True:
             try:
                 logging.info("Connecting to SSE Server")
@@ -46,12 +43,13 @@ class SseClient:
     def read_messages(self):
         url = f'{config[env]["server_host"]}/events/device'
         messages = SSEClient(url)
-        LED(25).on()
 
         for message in messages:
             logging.debug(f"Message: {message.data}")
             command = json.loads(message.data)
             self.process_command(command)
+
+        print("After for loop")
 
     def process_command(self, command):
         if command["status"] == "STOP":
@@ -68,12 +66,11 @@ class SseClient:
                     "Hardware must be stopped before making an update")
             else:
                 set_head = int(command["data"]["setHead"])
-                pid_gain = int(command["data"]["pid"]["gain"])
                 logging.info(
                     f"Received ACTIVE status with setHead: {set_head}")
 
                 threading.Thread(
-                    target=self._hardware_controller.start_hardware, args=[set_head, pid_gain]).start()
+                    target=self._hardware_controller.start_hardware, args=[set_head]).start()
                 self._hardware_started = True
 
 

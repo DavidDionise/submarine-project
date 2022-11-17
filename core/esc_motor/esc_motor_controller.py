@@ -1,13 +1,14 @@
 import time
 from gpiozero import Servo
 import logging
+from gpiozero.pins.pigpio import PiGPIOFactory
 
 
 class EscMotorController:
 
     def __init__(self, gpio_pin):
         self._motor_active = False
-        self._servo = Servo(gpio_pin)
+        self._servo = Servo(gpio_pin, pin_factory=PiGPIOFactory())
 
     def run(self, servo_value):
         if self._motor_active:
