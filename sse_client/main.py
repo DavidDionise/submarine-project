@@ -68,11 +68,12 @@ class SseClient:
                     "Hardware must be stopped before making an update")
             else:
                 set_head = int(command["data"]["setHead"])
+                pid_gain = int(command["data"]["pid"]["gain"])
                 logging.info(
                     f"Received ACTIVE status with setHead: {set_head}")
 
                 threading.Thread(
-                    target=self._hardware_controller.start_hardware, args=[set_head]).start()
+                    target=self._hardware_controller.start_hardware, args=[set_head, pid_gain]).start()
                 self._hardware_started = True
 
 

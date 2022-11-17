@@ -11,9 +11,10 @@ class HardwareController:
 
         self._compass_publisher.set_lock(threading.Lock())
 
-    def start_hardware(self, set_head):
+    def start_hardware(self, set_head, pid_gain):
         logging.info("Starting hardware")
         self._steering_controller.update_set_head(set_head)
+        self._steering_controller.update_pid_gain(pid_gain)
         threading.Thread(target=self._esc_motor_controller.run,
                          args=[0.2]).start()
         threading.Thread(target=self._compass_publisher.run).start()

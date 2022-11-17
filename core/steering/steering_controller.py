@@ -1,5 +1,6 @@
 import logging
 from gpiozero import Servo
+from simple_pid import PID
 
 
 class SteeringController:
@@ -15,6 +16,8 @@ class SteeringController:
         self._compass_publisher = compass_publisher
         self._set_head = None
         self._angle_to_servo_duration_map = _generate_angle_to_servo_duration_map()
+        self._pid = PID(4, 0.677777, 0.375, setpoint=0,
+                        output_limits=(-90, 90))
 
         compass_publisher.register_listener(self.angle_change_handler)
 
@@ -33,7 +36,12 @@ class SteeringController:
         else:
             servo_angle_of_deviation = angle_of_deviation
 
-        servo_value = self._angle_to_servo_duration_map[servo_angle_of_deviation]
+        logging.debug(
+            f"Sending value to PID: {servo_angle_of_deviation * -1} with PID tunings: {self._pid.tunings}")
+
+        updated_servo_angle = int(self._pid(servo_angle_of_deviation * -1))
+
+        servo_value = self._angle_to_servo_duration_map[updated_servo_angle]
 
         logging.debug(f"Value sent to servo: {servo_value}")
 
@@ -41,6 +49,10 @@ class SteeringController:
 
     def update_set_head(self, set_head):
         self._set_head = set_head
+
+    def update_pid_gain(self, gain):
+        _, i, d = self._pid.tunings
+        self._pid.tunings = (gain, i, d)
 
     def stop(self):
         self._servo.value = 0

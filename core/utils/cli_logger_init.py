@@ -4,8 +4,8 @@ import argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument("--log-to-file", action="store_true")
-parser.add_argument("--log-level", default="WARN",
-                    choices=["ERROR", "WARN", "WARNING", "INFO", "DEBUG"])
+parser.add_argument("--log-level", default="WARNING",
+                    choices=["ERROR", "WARNING", "INFO", "DEBUG"])
 args = parser.parse_args()
 
 levels = [
@@ -21,7 +21,7 @@ logger_level = next(
 
 if args.log_to_file:
     logging.basicConfig(
-        filename="logs.dat",
+        filename="logs.log",
         format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
         level=logger_level
     )
