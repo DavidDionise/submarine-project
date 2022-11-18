@@ -1,15 +1,23 @@
 
-from core.steering.steering_controller import SteeringController
-from core.compass.compass_publisher import CompassPublisher
 import logging
+from core.sync.event_bus import eventbus
+from core.hardware.esc_motor.esc_motor_controller import EscMotorController
+from core.hardware.compass.compass_publisher import CompassPublisher
+from core.hardware.steering.steering_controller import SteeringController
+import asyncio
 
-# logging.getLogger().setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
-compass_publisher = CompassPublisher(rate=0.1)
-steering_controller = SteeringController(
-    compass_publisher=compass_publisher,
-    set_head=0,
-    gpio_pin=18
-)
 
-compass_publisher.run()
+async def main():
+    compass_controller = CompassPublisher(error_threshold=60)
+    steering_controller = SteeringController(gpio_pin=18)
+
+    eventbus.publish("run", {"set_head": 180})
+
+    await asyncio.sleep(100)
+
+    eventbus.publish("stop")
+
+
+asyncio.run(main())

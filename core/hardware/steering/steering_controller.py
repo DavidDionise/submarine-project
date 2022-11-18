@@ -1,25 +1,22 @@
 import logging
 from gpiozero import Servo
 from gpiozero.pins.pigpio import PiGPIOFactory
+from core.sync.event_bus import eventbus
 
 
 class SteeringController:
-    def __init__(self, compass_publisher, gpio_pin):
-        """
+    def __init__(self, gpio_pin: int):
 
-        Args:
-            compass_publisher (CompassPublisher): used to listen for direction changes
-            set_head (int): Desired direction of travel
-            gpio_pin (int): Pin on Raspberry PI that servo is getting input from
-        """
         self._servo = Servo(gpio_pin, pin_factory=PiGPIOFactory())
-        self._compass_publisher = compass_publisher
         self._set_head = None
         self._angle_to_servo_duration_map = _generate_angle_to_servo_duration_map()
 
-        compass_publisher.register_listener(self.angle_change_handler)
+        eventbus.subscribe("compass-change", self.angle_change_handler)
+        eventbus.subscribe("run", self.update_set_head)
+        eventbus.subscribe("update", self.update_set_head)
+        eventbus.subscribe("stop", self.stop)
 
-    def angle_change_handler(self, angle):
+    async def angle_change_handler(self, angle: int):
         if self._set_head == None:
             logging.error("\"set_head\" set to None")
             return
@@ -40,14 +37,14 @@ class SteeringController:
 
         self._servo.value = servo_value
 
-    def update_set_head(self, set_head):
-        self._set_head = set_head
+    async def update_set_head(self, data: dict):
+        self._set_head = data["set_head"]
 
-    def stop(self):
+    async def stop(self):
         self._servo.value = 0
 
 
-def _calculate_angle_of_deviation(current_read, set_head):
+def _calculate_angle_of_deviation(current_read: int, set_head: int) -> int:
     """Calculates angle of deviation (ie, smallest angle) between current_read and set_head
 
     Args:
@@ -68,12 +65,12 @@ def _calculate_angle_of_deviation(current_read, set_head):
         return angle
 
 
-def _generate_angle_to_servo_duration_map(min=-90, max=90):
+def _generate_angle_to_servo_duration_map(min: int = -90, max: int = 90) -> dict:
     return {k: _angle_to_servo_duration(k) for k in range(min, max + 1)}
 
 
 def _angle_to_servo_duration(angle):
-    """Maps compass angle to servo value. Servo values are -1 >= n <= 1
+    """Maps compass angle to servo value. Servo values are -1 >= n <= 1. Possible angles are 0 >= n <= 180
     eg. 0° -> -1, 90° -> 0, 180° -> 1
 
     Args:

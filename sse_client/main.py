@@ -1,14 +1,12 @@
-from core.compass.compass_publisher import CompassPublisher
-from core.esc_motor.esc_motor_controller import EscMotorController
-from core.hardware_coordinator.hardware_coordinator import HardwareController
-from core.steering.steering_controller import SteeringController
+from core.hardware.compass.compass_publisher import CompassPublisher
+from core.hardware.esc_motor.esc_motor_controller import EscMotorController
+from core.hardware.steering.steering_controller import SteeringController
 from sse_client.init_config import config
 from sseclient import SSEClient
 import logging
 import os
 import json
 import time
-import threading
 import core.utils.cli_logger_init
 from gpiozero import LED
 
@@ -19,18 +17,9 @@ class SseClient:
     def __init__(self):
         self._esc_motor_controller = EscMotorController(gpio_pin=12)
         self._compass_publisher = CompassPublisher()
-        self._steering_controller = SteeringController(
-            compass_publisher=self._compass_publisher,
-            gpio_pin=18
-        )
-        self._hardware_controller = HardwareController(
-            compass_publisher=self._compass_publisher,
-            steering_controller=self._steering_controller,
-            esc_motor_controller=self._esc_motor_controller
-        )
-        self._hardware_started = False
+        self._steering_controller = SteeringController(gpio_pin=18)
 
-    def run(self):
+    async def run(self):
         while True:
             try:
                 logging.info("Connecting to SSE Server")
@@ -49,29 +38,8 @@ class SseClient:
             command = json.loads(message.data)
             self.process_command(command)
 
-        print("After for loop")
-
-    def process_command(self, command):
-        if command["status"] == "STOP":
-            if self._hardware_started == False:
-                logging.warn("Hardware already stopped")
-            else:
-                logging.info("Received STOP status")
-                self._hardware_controller.stop_hardware()
-                self._hardware_started = False
-
-        else:
-            if self._hardware_started == True:
-                logging.warn(
-                    "Hardware must be stopped before making an update")
-            else:
-                set_head = int(command["data"]["setHead"])
-                logging.info(
-                    f"Received ACTIVE status with setHead: {set_head}")
-
-                threading.Thread(
-                    target=self._hardware_controller.start_hardware, args=[set_head]).start()
-                self._hardware_started = True
+    def process_command(self, command: dict):
+        pass
 
 
 if __name__ == "__main__":
