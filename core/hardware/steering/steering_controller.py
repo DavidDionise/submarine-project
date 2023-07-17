@@ -6,7 +6,6 @@ from core.sync.event_bus import eventbus
 
 class SteeringController:
     def __init__(self, gpio_pin: int):
-
         self._servo = Servo(gpio_pin, pin_factory=PiGPIOFactory())
         self._set_head = None
         self._angle_to_servo_duration_map = _generate_angle_to_servo_duration_map()
@@ -18,11 +17,10 @@ class SteeringController:
 
     async def angle_change_handler(self, angle: int):
         if self._set_head == None:
-            logging.error("\"set_head\" set to None")
+            logging.error('"set_head" set to None')
             return
 
-        angle_of_deviation = _calculate_angle_of_deviation(
-            angle, self._set_head)
+        angle_of_deviation = _calculate_angle_of_deviation(angle, self._set_head)
 
         if angle_of_deviation < -90:
             servo_angle_of_deviation = -90
@@ -83,4 +81,4 @@ def _angle_to_servo_duration(angle):
     if angle == 0:  # Avoid div by 0 error
         return 0
     else:
-        return float(f'{2.0 / (180.0 / angle):.2f}')
+        return float(f"{2.0 / (180.0 / angle):.2f}")

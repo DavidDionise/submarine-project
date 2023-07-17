@@ -25,8 +25,7 @@ class SseClient:
                 logging.info("Connecting to SSE Server")
                 self.read_messages()
             except BaseException as e:
-                logging.error(
-                    f"{e}\n\nRetrying in 3 seconds")
+                logging.error(f"{e}\n\nRetrying in 3 seconds")
                 time.sleep(3)
 
     def read_messages(self):
