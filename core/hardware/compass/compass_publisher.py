@@ -6,7 +6,7 @@ from core.sync.event_bus import eventbus
 import logging
 
 i2c = board.I2C()  # uses board.SCL and board.SDA
-sensor = adafruit_lis3mdl.LIS3MDL(i2c)
+sensor = adafruit_lis3mdl.LIS3MDL(i2c, 0x1C)
 
 
 class CompassPublisher:
@@ -30,8 +30,6 @@ class CompassPublisher:
             positive_angle_degrees = int(
                 angle_degrees if angle_degrees > 0 else angle_degrees + 360
             )
-
-            # logging.info(f'Publishing angle: {positive_angle_degrees}')
 
             eventbus.publish("compass-change", positive_angle_degrees)
 

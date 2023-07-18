@@ -29,13 +29,7 @@ async def get_user_input():
 
 
 async def main():
-    # esc = EscMotorController(gpio_pin=12)
-    compass_controller = CompassPublisher()
-    sc = SteeringController(gpio_pin=18)
-
     eventbus.publish("run", {"set_head": 270, "esc_servo_value": 0.2})
-
-    # eventbus.publish("compass-change", 200)
 
     await asyncio.create_task(get_user_input())
 

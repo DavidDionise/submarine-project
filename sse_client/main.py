@@ -8,6 +8,7 @@ import os
 import json
 import time
 import core.utils.cli_logger_init
+import asyncio
 from gpiozero import LED
 
 env = os.environ["ENV"]
@@ -22,7 +23,9 @@ class SseClient:
     async def run(self):
         while True:
             try:
-                logging.info("Connecting to SSE Server")
+                logging.info(
+                    f'Connecting to SSE Server at {config[env]["server_host"]}'
+                )
                 self.read_messages()
             except BaseException as e:
                 logging.error(f"{e}\n\nRetrying in 3 seconds")
@@ -42,4 +45,4 @@ class SseClient:
 
 
 if __name__ == "__main__":
-    SseClient().run()
+    asyncio.run(SseClient().run())
