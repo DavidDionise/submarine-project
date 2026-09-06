@@ -1,7 +1,7 @@
 from unittest import TestCase
 from decimal import Decimal
 
-from core.steering.steering_controller import _calculate_angle_of_deviation, _angle_to_servo_duration
+from core.hardware.steering.steering_controller import _calculate_angle_of_deviation, _angle_to_servo_duration
 
 
 class Test(TestCase):
